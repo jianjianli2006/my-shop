@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城后台</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .login-box,
+        .order-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 80px auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .logout {
+            width: auto;
+            padding: 8px 15px;
+            float: right;
+        }
+
+        .error {
+            color: #e53935;
+            margin-top: 10px;
+        }
+
+        .order-count {
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f7f7f7;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🛍️ 我的商城 · 卖家后台</h1>
+</header>
+
+
+<!-- 登录页面 -->
+
+<div id="loginPage" class="container">
+
+    <div class="login-box">
+
+        <h2>管理员登录</h2>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="请输入管理员邮箱"
+        >
+
+        <input
+            id="password"
+            type="password"
+            placeholder="请输入密码"
+        >
+
+        <button onclick="login()">
+            登录后台
+        </button>
+
+        <div id="loginError" class="error"></div>
+
+    </div>
+
+</div>
+
+
+<!-- 后台页面 -->
+
+<div id="adminPage" class="container hidden">
+
+    <div class="order-box">
+
+        <button class="logout" onclick="logout()">
+            退出登录
+        </button>
+
+        <h2>订单管理</h2>
+        <button
+    onclick="loadOrders()"
+    style="width:auto; padding:8px 15px; margin-bottom:15px;"
+>
+    🔄 刷新订单
+</button>
+
+        <div id="orderCount" class="order-count">
+            正在加载订单...
+        </div>
+        <select id="statusFilter" onchange="loadOrders()"
+    style="padding:10px; margin-bottom:20px; border:1px solid #ddd; border-radius:8px;">
+    <option value="">全部订单</option>
+    <option value="新订单">新订单</option>
+    <option value="已处理">已处理</option>
+    <option value="已发货">已发货</option>
+    <option value="已完成">已完成</option>
+</select>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>时间</th>
+                        <th>商品</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>金额</th>
+                        <th>姓名</th>
+                        <th>手机号</th>
+                        <th>收货地址</th>
+                        <th>备注</th>
+                        <th>订单状态</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="orderList"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // =========================
+    // Supabase 配置
+    // =========================
+
+    const SUPABASE_URL =
+        "https://fegghyxseuibvewmjtms.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_1lrWGBaqs5wN58_P6JKPFw_tkE1cXAn";
+
+
+    // =========================
+    // 管理员登录
+    // =========================
+
+    async function login() {
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+        const error =
+            document.getElementById("loginError");
+
+
+        error.innerText = "";
+
+
+        if (!email || !password) {
+
+            error.innerText = "请输入邮箱和密码";
+
+            return;
+        }
+
+
+        try {
+
+            const response = await fetch(
+                SUPABASE_URL + "/auth/v1/token?grant_type=password",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "apikey": SUPABASE_KEY
+                    },
+
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+
+                error.innerText =
+                    data.msg ||
+                    data.error_description ||
+                    "登录失败";
+
+                return;
+            }
+
+
+            // 保存登录信息
+            localStorage.setItem(
+                "access_token",
+                data.access_token
+            );
+
+
+            showAdmin();
+
+        }
+
+        catch (e) {
+
+            error.innerText =
+                "网络错误，请检查网络连接";
+
+        }
+    }
+
+
+    // =========================
+    // 显示后台
+    // =========================
+
+    function showAdmin() {
+
+        document
+            .getElementById("loginPage")
+            .classList.add("hidden");
+
+        document
+            .getElementById("adminPage")
+            .classList.remove("hidden");
+
+        loadOrders();
+    }
+
+
+    // =========================
+    // 获取订单
+    // =========================
+
+    async function loadOrders() {
+        const statusFilter =
+    document.getElementById("statusFilter").value;
+
+        const token =
+            localStorage.getItem("access_token");
+
+
+        if (!token) {
+
+            return;
+        }
+
+
+        try {
+
+            const response = await fetch(
+                SUPABASE_URL +
+                "/rest/v1/orders?select=*&" +
+(statusFilter
+    ? "status=eq." + encodeURIComponent(statusFilter) + "&"
+    : "") +
+"order=created_at.desc",
+                {
+                    method: "GET",
+
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+
+            if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                console.error(errorText);
+
+                document.getElementById("orderCount").innerText =
+                    "订单读取失败";
+
+                return;
+            }
+
+
+            const orders =
+                await response.json();
+
+
+            document.getElementById("orderCount").innerText =
+                "共 " + orders.length + " 个订单";
+
+
+            const list =
+                document.getElementById("orderList");
+
+
+            list.innerHTML = "";
+
+
+            orders.forEach(order => {
+
+                const row =
+                    document.createElement("tr");
+
+
+                const date =
+                    order.created_at
+                        ? new Date(order.created_at)
+                            .toLocaleString("zh-CN")
+                        : "";
+
+
+                row.innerHTML = `
+
+                    <td>${escapeHtml(date)}</td>
+
+                    <td>${escapeHtml(order.product_name || "")}</td>
+
+                    <td>¥${escapeHtml(order.price || "")}</td>
+
+                    <td>${escapeHtml(order.quantity || "")}</td>
+
+                    <td>¥${escapeHtml(order.total || "")}</td>
+
+                    <td>${escapeHtml(order.name || "")}</td>
+
+                    <td>${escapeHtml(order.phone || "")}</td>
+
+                    <td>${escapeHtml(order.address || "")}</td>
+
+                    <td>${escapeHtml(order.remark || "")}</td>
+                    <td>
+    <select onchange="updateStatus(${order.id}, this.value)">
+        <option value="新订单" ${order.status === "新订单" ? "selected" : ""}>新订单</option>
+        <option value="已处理" ${order.status === "已处理" ? "selected" : ""}>已处理</option>
+        <option value="已发货" ${order.status === "已发货" ? "selected" : ""}>已发货</option>
+        <option value="已完成" ${order.status === "已完成" ? "selected" : ""}>已完成</option>
+    </select>
+</td>
+
+                `;
+
+
+                list.appendChild(row);
+
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            document.getElementById("orderCount").innerText =
+                "读取订单时发生错误";
+
+        }
+    }
+
+
+    // =========================
+    // 防止订单内容直接当 HTML
+    // =========================
+
+    function escapeHtml(text) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+    }
+
+
+    // =========================
+// 修改订单状态
+// =========================
+
+async function updateStatus(orderId, status) {
+
+    const token =
+        localStorage.getItem("access_token");
+
+    try {
+
+        const response = await fetch(
+            SUPABASE_URL +
+            "/rest/v1/orders?id=eq." + orderId,
+            {
+                method: "PATCH",
+
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+
+                body: JSON.stringify({
+                    status: status
+                })
+            }
+        );
+
+        if (!response.ok) {
+
+            const errorText =
+                await response.text();
+
+            console.error(errorText);
+
+            alert("订单状态修改失败");
+
+            return;
+        }
+
+        console.log("订单状态已更新");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("修改订单状态时发生错误");
+
+    }
+}
+    // =========================
+    // 退出登录
+    // =========================
+
+    function logout() {
+
+        localStorage.removeItem("access_token");
+
+        location.reload();
+
+    }
+
+
+    // =========================
+    // 自动检查登录状态
+    // =========================
+
+    window.onload = function() {
+
+        const token =
+            localStorage.getItem("access_token");
+
+
+        if (token) {
+
+            showAdmin();
+
+        }
+
+    };
+
+</script>
+
+</body>
+</html>

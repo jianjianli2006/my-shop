@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>我的代购商城</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .cart {
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            margin-bottom: 25px;
+        }
+
+        .title h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            color: #888;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .product {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px;
+            background: #eeeeee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #999;
+        }
+
+        .product-info {
+            padding: 16px;
+        }
+
+        .product-name {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .stock {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        /* 下单窗口 */
+
+        .modal {
+            display: none;
+
+            position: fixed;
+            left: 0;
+            top: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0,0,0,0.5);
+
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+
+            width: 90%;
+            max-width: 450px;
+
+            padding: 30px;
+
+            border-radius: 15px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .order-info {
+            background: #f7f7f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .quantity button {
+            width: 40px;
+            padding: 8px;
+        }
+
+        .quantity span {
+            font-size: 18px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: none;
+        }
+
+        .submit-button {
+            margin-top: 10px;
+        }
+
+        .close-button {
+            background: #ddd;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 800px) {
+
+            .products {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .products {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        我的代购商城
+    </div>
+
+    <div class="cart">
+        🛒 购物车
+    </div>
+
+</header>
+
+
+
+<div class="container">
+
+
+    <div class="title">
+
+        <h1>
+            韩国好物
+        </h1>
+
+        <p>
+            韩国商品代购 · 正品保障
+        </p>
+
+    </div>
+
+
+
+    <div class="products">
+
+
+        <!-- 商品1 -->
+
+        <div class="product">
+
+            <div class="product-image">
+                商品图片
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-name">
+                    湿敷棉片
+                </div>
+
+                <div class="price">
+                    ¥39
+                </div>
+
+                <div class="stock">
+                    库存：20件
+                </div>
+
+                <button onclick="openOrder('湿敷棉片', 39)">
+                    立即下单
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 商品2 -->
+
+        <div class="product">
+
+            <div class="product-image">
+                商品图片
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-name">
+                    韩国面膜
+                </div>
+
+                <div class="price">
+                    ¥25
+                </div>
+
+                <div class="stock">
+                    库存：30件
+                </div>
+
+                <button onclick="openOrder('韩国面膜', 25)">
+                    立即下单
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 商品3 -->
+
+        <div class="product">
+
+            <div class="product-image">
+                商品图片
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-name">
+                    韩国护肤品
+                </div>
+
+                <div class="price">
+                    ¥99
+                </div>
+
+                <div class="stock">
+                    库存：10件
+                </div>
+
+                <button onclick="openOrder('韩国护肤品', 99)">
+                    立即下单
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 商品4 -->
+
+        <div class="product">
+
+            <div class="product-image">
+                商品图片
+            </div>
+
+            <div class="product-info">
+
+                <div class="product-name">
+                    韩国潮牌帽子
+                </div>
+
+                <div class="price">
+                    ¥159
+                </div>
+
+                <div class="stock">
+                    库存：5件
+                </div>
+
+                <button onclick="openOrder('韩国潮牌帽子', 159)">
+                    立即下单
+                </button>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- 下单窗口 -->
+<!-- ========================= -->
+
+<div class="modal" id="orderModal">
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-title">
+            提交订单
+        </div>
+
+
+        <div class="order-info">
+
+            <div>
+                商品：
+                <strong id="orderProduct"></strong>
+            </div>
+
+            <div style="margin-top:8px;">
+                单价：
+                ¥<span id="orderPrice"></span>
+            </div>
+
+
+            <div class="quantity">
+
+                <button onclick="changeQuantity(-1)">
+                    −
+                </button>
+
+                <span id="quantity">
+                    1
+                </span>
+
+                <button onclick="changeQuantity(1)">
+                    ＋
+                </button>
+
+            </div>
+
+
+            <div style="margin-top:12px;font-weight:bold;">
+
+                合计：
+                ¥<span id="totalPrice"></span>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="form-group">
+
+            <label>
+                姓名
+            </label>
+
+            <input
+                id="name"
+                type="text"
+                placeholder="请输入姓名"
+            >
+
+        </div>
+
+
+
+        <div class="form-group">
+
+            <label>
+                手机号
+            </label>
+
+            <input
+                id="phone"
+                type="text"
+                placeholder="请输入手机号"
+            >
+
+        </div>
+
+
+
+        <div class="form-group">
+
+            <label>
+                收货地址
+            </label>
+
+            <textarea
+                id="address"
+                placeholder="请输入收货地址"
+            ></textarea>
+
+        </div>
+
+
+
+        <div class="form-group">
+
+            <label>
+                备注
+            </label>
+
+            <textarea
+                id="remark"
+                placeholder="有什么需要告诉卖家的吗？"
+            ></textarea>
+
+        </div>
+
+
+
+        <button
+            class="submit-button"
+            onclick="submitOrder()"
+        >
+            提交订单
+        </button>
+
+
+        <button
+            class="close-button"
+            onclick="closeOrder()"
+        >
+            取消
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    // =========================
+    // Supabase 配置
+    // =========================
+
+    const SUPABASE_URL = "https://fegghyxseuibvewmjtms.supabase.co";
+
+    const SUPABASE_KEY = "sb_publishable_1lrWGBaqs5wN58_P6JKPFw_tkE1cXAn"
+
+
+    // =========================
+    // 当前订单信息
+    // =========================
+
+    let currentProduct = "";
+    let currentPrice = 0;
+    let currentQuantity = 1;
+
+
+    // =========================
+    // 打开下单窗口
+    // =========================
+
+    function openOrder(product, price) {
+
+        currentProduct = product;
+        currentPrice = price;
+        currentQuantity = 1;
+
+        document.getElementById("orderProduct").innerText = product;
+        document.getElementById("orderPrice").innerText = price;
+        document.getElementById("quantity").innerText = currentQuantity;
+        document.getElementById("totalPrice").innerText = price;
+
+        document.getElementById("orderModal").style.display = "flex";
+    }
+
+
+    // =========================
+    // 修改数量
+    // =========================
+
+    function changeQuantity(number) {
+
+        currentQuantity += number;
+
+        if (currentQuantity < 1) {
+            currentQuantity = 1;
+        }
+
+        document.getElementById("quantity").innerText = currentQuantity;
+
+        let total = currentPrice * currentQuantity;
+
+        document.getElementById("totalPrice").innerText = total;
+    }
+
+
+    // =========================
+    // 关闭下单窗口
+    // =========================
+
+    function closeOrder() {
+
+        document.getElementById("orderModal").style.display = "none";
+    }
+
+
+    // =========================
+    // 提交订单
+    // =========================
+
+    async function submitOrder() {
+
+        let name = document.getElementById("name").value.trim();
+        let phone = document.getElementById("phone").value.trim();
+        let address = document.getElementById("address").value.trim();
+        let remark = document.getElementById("remark").value.trim();
+
+        // 检查必填信息
+        if (name === "" || phone === "" || address === "") {
+
+            alert("请填写完整的收货信息");
+
+            return;
+        }
+
+
+        // 计算总价
+        let total = currentPrice * currentQuantity;
+
+
+        // 准备订单数据
+        let orderData = {
+
+            product_name: currentProduct,
+
+            price: currentPrice,
+
+            quantity: currentQuantity,
+
+            total: total,
+
+            name: name,
+
+            phone: phone,
+
+            address: address,
+
+            remark: remark
+        };
+
+
+        try {
+
+            // 写入 Supabase
+            let response = await fetch(
+                SUPABASE_URL + "/rest/v1/orders",
+                {
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type": "application/json",
+
+                        "apikey": SUPABASE_KEY,
+
+                        "Authorization": "Bearer " + SUPABASE_KEY,
+
+                        "Prefer": "return=minimal"
+                    },
+
+                    body: JSON.stringify(orderData)
+                }
+            );
+
+
+            // 如果失败
+            if (!response.ok) {
+
+                let errorText = await response.text();
+
+                console.error("Supabase错误：", errorText);
+
+                alert(
+                    "订单提交失败！\n\n" +
+                    "错误信息：\n" +
+                    errorText
+                );
+
+                return;
+            }
+
+
+            // 提交成功
+            alert(
+                "订单提交成功！🎉\n\n" +
+                "商品：" + currentProduct +
+                "\n数量：" + currentQuantity +
+                "\n合计：¥" + total
+            );
+
+
+            // 清空表单
+            document.getElementById("name").value = "";
+            document.getElementById("phone").value = "";
+            document.getElementById("address").value = "";
+            document.getElementById("remark").value = "";
+
+
+            // 关闭窗口
+            closeOrder();
+
+        }
+
+        catch (error) {
+
+            console.error("网络错误：", error);
+
+            alert(
+                "订单提交失败！\n\n" +
+                "请检查网络连接，或者联系卖家。"
+            );
+        }
+    }
+
+</script>
+        "\n合计：¥" + (currentPrice * currentQuantity)
+    );
+
+
+    closeOrder();
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
